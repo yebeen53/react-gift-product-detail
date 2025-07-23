@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { apiClient } from '@/api/apiClient';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 export interface ThemeDetail {
   image: string | undefined;
@@ -10,37 +10,18 @@ export interface ThemeDetail {
   backgroundColor: string;
 }
 
-const fetchThemeDetail = async (themeId: string): Promise<ThemeDetail | null> => {
-  try {
-    const res = await apiClient.get(`/api/themes/${themeId}/info`);
-    return res.data?.data ?? null;
-  } catch {
-    return null;
+const fetchThemeDetail = async (themeId: string): Promise<ThemeDetail> => {
+  const res = await apiClient.get(`/api/themes/${themeId}/info`);
+  const data = res.data?.data;
+  if (!data) {
+    throw new Error('테마 정보가 없습니다.');
   }
+  return data;
 };
 
-export const useThemeInfo = (themeId: string | null) => {
-  const [info, setInfo] = useState<ThemeDetail | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (themeId === null) return;
-
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchThemeDetail(themeId);
-        setInfo(data);
-      } catch {
-        setError('테마 정보를 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [themeId]);
-
-  return { info, loading, error };
+export const useThemeInfo = (themeId: string) => {
+  return useSuspenseQuery({
+    queryKey: ['themeDetail', themeId],
+    queryFn: () => fetchThemeDetail(themeId),
+  });
 };
