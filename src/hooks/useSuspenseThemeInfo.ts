@@ -19,7 +19,7 @@ const fetchThemeDetail = async (themeId: string): Promise<ThemeDetail> => {
   return data;
 };
 
-export const useThemeInfo = (themeId: string) => {
+export const useSuspenseThemeInfo = (themeId: string) => {
   return useSuspenseQuery({
     queryKey: ['themeDetail', themeId],
     queryFn: () => fetchThemeDetail(themeId),
