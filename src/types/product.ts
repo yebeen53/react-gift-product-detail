@@ -16,6 +16,9 @@ export interface ProductApiResponse {
   };
 }
 export interface Product {
+  list: ProductApiResponse[];
+  cursor: ['themeProducts', string] | null | undefined;
+  hasMoreList: boolean;
   image: string | undefined;
   id: number;
   brand: string;
@@ -23,4 +26,9 @@ export interface Product {
   price: number;
   imageURL: string;
   ranking: number;
+}
+export interface ThemeProductsData {
+  list: ProductApiResponse[];
+  cursor: number;
+  hasMoreList: boolean;
 }
