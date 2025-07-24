@@ -1,13 +1,14 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
-import axios from 'axios';
-import ProductList from '@/components/ProductList';
-import { useThemeProducts } from '@/hooks/useThemeProduct';
-import { useThemeInfo } from '@/hooks/useThemeInfo';
+import { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { useSuspenseThemeInfo } from '@/hooks/useSuspenseThemeInfo';
+import { useSuspenseThemeProducts } from '@/hooks/useSuspenseThemeProduct';
+
 import HeroBanner from '@/components/HeroBanner';
+import ProductList from '@/components/ProductList';
 import type { Theme } from '@/data/theme';
 import theme from '@/data/theme';
-import { useEffect } from 'react';
 import { ROUTES } from '@/constants/routes';
 
 const containerStyle = (theme: Theme) => css`
@@ -16,27 +17,17 @@ const containerStyle = (theme: Theme) => css`
   padding: ${theme.spacing.spacing4};
 `;
 
-const ThemeProductPage = () => {
-  const { themeId } = useParams<{ themeId: string }>();
+const ThemeProductContent = ({ themeId }: { themeId: string }) => {
   const navigate = useNavigate();
-  const { info: bannerInfo, error: themeError } = useThemeInfo(themeId ?? '');
+  const { data: bannerInfo } = useSuspenseThemeInfo(themeId);
   const {
-    products,
-    loading: productsLoading,
-    error: productsError,
+    data,
+    fetchNextPage,
     hasNextPage,
-    fetchNextProduct,
-  } = useThemeProducts(themeId ?? '');
+    isFetchingNextPage,
+  } = useSuspenseThemeProducts(themeId);
 
-  useEffect(() => {
-    if (
-      themeError &&
-      axios.isAxiosError(themeError) &&
-      themeError.response?.status === 404
-    ) {
-      navigate(ROUTES.HOME);
-    }
-  }, [themeError, navigate]);
+  const products = data?.pages.flatMap((page) => page.list) ?? [];
 
   const handleProductClick = (productId: string | number) => {
     navigate(`/order/${productId}`);
@@ -56,23 +47,38 @@ const ThemeProductPage = () => {
         />
       )}
 
-      {themeError && !axios.isAxiosError(themeError) && (
-        <p>테마 정보를 불러오지 못했습니다.</p>
-      )}
-
-      {productsError && (
-        <p>상품 목록을 불러오지 못했습니다: {String(productsError)}</p>
-      )}
-
       <ProductList
         products={products}
         hasNextPage={hasNextPage}
-        setPage={fetchNextProduct}
-        loading={productsLoading}
-        error={productsError}
+        fetchNextPage={fetchNextPage}
+        loading={isFetchingNextPage}
         onProductClick={handleProductClick}
+        error={null}
       />
     </div>
+  );
+};
+
+const ThemeProductPage = () => {
+  const { themeId } = useParams<{ themeId: string }>();
+  const navigate = useNavigate();
+
+  if (!themeId) return <p>테마 ID가 없습니다.</p>;
+
+  return (
+    <ErrorBoundary
+      fallbackRender={({ error }) => {
+        if (error?.response?.status === 404) {
+          navigate(ROUTES.HOME);
+          return null;
+        }
+        return <p>문제가 발생했습니다. 다시 시도해주세요.</p>;
+      }}
+    >
+      <Suspense fallback={<p>로딩 중...</p>}>
+        <ThemeProductContent themeId={themeId} />
+      </Suspense>
+    </ErrorBoundary>
   );
 };
 
