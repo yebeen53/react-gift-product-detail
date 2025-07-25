@@ -6,7 +6,6 @@ import { FormProvider } from 'react-hook-form';
 
 import useRequireAuth from '@/hooks/useRequireAuth';
 import useCustomTheme from '@/hooks/useCustomTheme';
-import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import CardSelector from '@/components/order/CardSelector';
@@ -15,14 +14,14 @@ import SenderInput from '@/components/order/SenderInput';
 import RecipientSummary from '@/components/order/RecipientSummary';
 import RecipientModal from '@/components/order/RecipientModal';
 import PriceSummary from '@/components/order/PriceSummary';
+import ProductSummary from '@/components/order/ProductSummary';
 
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import useAuth from '@/hooks/useAuth';
-import ProductSummary from '@/components/order/ProductSummary';
-import { isClientRequestError, isServerError } from '@/utils/http';
-import { HttpStatusCode } from 'axios';
 import { ROUTES } from '@/constants/routes';
+import { useSuspenseQuery, useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import { useState } from 'react';
 
 type ProductInfo = {
   name: string;
@@ -32,53 +31,37 @@ type ProductInfo = {
   imageURL?: string;
 };
 
+const fetchProduct = async (productId: string): Promise<ProductInfo> => {
+  const [summaryRes, detailRes] = await Promise.all([
+    axios.get(`/api/products/${productId}/summary`),
+    axios.get(`/api/products/${productId}/detail`),
+  ]);
+
+  const summary = summaryRes.data.data;
+  const detail = detailRes.data.data;
+
+  return {
+    name: summary.name,
+    price: summary.price,
+    description: detail.description,
+    brandName: summary.brandName,
+    imageURL: summary.imageURL,
+  };
+};
+
 const OrderPage = () => {
   const user = useRequireAuth();
   const { user: userInfo } = useAuth();
   const theme = useCustomTheme();
   const navigate = useNavigate();
   const { productId } = useParams<{ productId: string }>();
-  const [product, setProduct] = useState<ProductInfo | null>(null);
-  const [productPrice, setProductPrice] = useState<number>(0);
   const [isModalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (!productId) return;
-
-    const fetchProduct = async () => {
-      try {
-        const [summaryRes, detailRes] = await Promise.all([
-          axios.get(`/api/products/${productId}/summary`),
-          axios.get(`/api/products/${productId}/detail`),
-        ]);
-
-        const summary = summaryRes.data.data;
-        const detail = detailRes.data.data;
-
-        setProduct({
-          name: summary.name,
-          price: summary.price,
-          description: detail.description,
-          brandName: summary.brandName,
-          imageURL: summary.imageURL,
-        });
-        setProductPrice(summary.price);
-      } catch (error: unknown) {
-        if (
-          error instanceof Error &&
-          axios.isAxiosError(error) &&
-          isClientRequestError(error)
-        ) {
-          toast.error('상품 정보를 불러오지 못했습니다.');
-          navigate(ROUTES.HOME);
-        } else {
-          toast.error('서버 오류가 발생했습니다.');
-        }
-      }
-    };
-
-    fetchProduct();
-  }, [productId, navigate]);
+  const { data: product } = useSuspenseQuery<ProductInfo>({
+    queryKey: ['productInfo', productId],
+    queryFn: () => fetchProduct(productId!),
+    
+  });
 
   const methods = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
@@ -108,25 +91,18 @@ const OrderPage = () => {
   const selectedCardId = watch('selectedCardId');
   const recipients = watch('recipients');
 
-  if (!user) return null;
-
   const totalQuantity = recipients.reduce(
     (sum, r) => sum + Number(r.quantity || 0),
     0
   );
-  const totalPrice = totalQuantity * productPrice;
+  const totalPrice = totalQuantity * (product?.price ?? 0);
 
-  const onSubmit: SubmitHandler<OrderFormData> = async (data) => {
-    const authToken = localStorage.getItem('authToken');
+  const orderMutation = useMutation({
+    mutationFn: async (data: OrderFormData) => {
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) throw new Error('인증 정보 없음');
 
-    if (!authToken) {
-      toast.error('인증 정보가 없습니다.');
-      navigate(ROUTES.HOME);
-      return;
-    }
-
-    try {
-      await axios.post(
+      return axios.post(
         '/api/order',
         {
           productId: Number(productId),
@@ -146,40 +122,41 @@ const OrderPage = () => {
           },
         }
       );
-
+    },
+    onSuccess: (_, data) => {
       toast.success(
         <div>
           주문이 완료되었습니다.
           <br />
-          구매 수량:{totalQuantity}
+          구매 수량: {totalQuantity}
           <br />
-          발신자 이름:{data.senderName}
+          발신자 이름: {data.senderName}
           <br />
-          메시지:{data.message}
+          메시지: {data.message}
         </div>
       );
-
       navigate(ROUTES.HOME);
-    } catch (error: unknown) {
+    },
+    onError: (error:unknown) => {
       if (axios.isAxiosError(error)) {
-        const status = error.response!.status;
-        if (isClientRequestError(error)) {
-          if (status === HttpStatusCode.Unauthorized) {
-            toast.error('로그인이 필요합니다.');
-            navigate(ROUTES.HOME);
-          } else {
-            toast.error(error.response?.data.message || '주문에 실패했습니다.');
-          }
-        } else if (isServerError(error)) {
-          toast.error('서버 오류가 발생했습니다.');
+        const status = error.response?.status;
+        if (status === 401) {
+          toast.error('로그인이 필요합니다.');
+          navigate(ROUTES.HOME);
         } else {
-          toast.error('네트워크 오류가 발생했습니다.');
+          toast.error(error.response?.data.message || '주문에 실패했습니다.');
         }
       } else {
         toast.error('알 수 없는 오류가 발생했습니다.');
       }
-    }
+    },
+  });
+
+  const onSubmit: SubmitHandler<OrderFormData> = (data) => {
+    orderMutation.mutate(data);
   };
+
+  if (!user) return null;
 
   return (
     <FormProvider {...methods}>
@@ -228,7 +205,8 @@ const OrderPage = () => {
             setValue={setValue}
           />
         )}
-        {product && <ProductSummary product={product} theme={theme} />}
+
+        <ProductSummary product={product} theme={theme} />
         <PriceSummary
           totalPrice={totalPrice}
           theme={theme}

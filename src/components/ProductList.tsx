@@ -6,7 +6,7 @@ import type { Theme } from '@/data/theme';
 import { css } from '@emotion/react';
 import theme from '@/data/theme';
 
-const gridStyle =(theme:Theme)=>css`
+const gridStyle = (theme: Theme) => css`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: ${theme.spacing.spacing4};
@@ -20,7 +20,7 @@ const gridStyle =(theme:Theme)=>css`
 interface ProductListProps {
   products: ProductApiResponse[];
   hasNextPage: boolean;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
+  fetchNextPage: () => void;
   loading: boolean;
   error: string | null;
   onProductClick?: (productId: string | number) => void;
@@ -29,10 +29,10 @@ interface ProductListProps {
 const ProductList = ({
   products,
   hasNextPage,
-  setPage,
+  fetchNextPage,
   loading,
   error,
-  onProductClick
+  onProductClick,
 }: ProductListProps) => {
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -43,16 +43,19 @@ const ProductList = ({
 
       observer.current = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting) {
-          setPage((prev) => prev + 1);
+          fetchNextPage();
         }
       });
 
       observer.current.observe(node);
     },
-    [hasNextPage, setPage]
+    [hasNextPage, fetchNextPage]
   );
-
-  if (!loading && products.length === 0 && !error) {
+  const filteredProducts = products.filter(
+    (product): product is ProductApiResponse =>
+      product !== undefined && product !== null
+  );
+  if (!loading && filteredProducts.length === 0 && !error) {
     return <EmptyState />;
   }
 
@@ -61,9 +64,9 @@ const ProductList = ({
       {products.map((product, i) => (
         <div
           key={product.id}
-          ref={i === products.length - 1 ? lastRef : undefined}
+          ref={i === filteredProducts.length - 1 ? lastRef : undefined}
           onClick={() => onProductClick && onProductClick(product.id)}
-          style={{ cursor: 'pointer' }} 
+          style={{ cursor: 'pointer' }}
         >
           <ProductCard product={product} />
         </div>

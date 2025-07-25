@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState, Suspense } from 'react';
 import { css } from '@emotion/react';
-import useCustomTheme from '../hooks/useCustomTheme';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
+
+import useCustomTheme from '../hooks/useCustomTheme';
 import Button from '@/components/Button';
 import GiftItem from '@/components/GiftItem';
-import { apiClient } from '@/api/apiClient';
-import type { ProductApiResponse, Product } from '@/types/product';
+import { useSuspenseGiftRankingProducts } from '@/hooks/useSuspenseGiftRankingProducts';
+import type { Product } from '@/types/product';
 
-const DEFAULT_GENDER: UserGenderLabel = '전체';
-const DEFAULT_CATEGORY: GiftRankingCategoryLabel = '받고 싶어한';
-
+const DEFAULT_GENDER = '전체';
+const DEFAULT_CATEGORY = '받고 싶어한';
 const INITIAL_VISIBLE_COUNT = 6;
 
 const userLabelToCodeMap = {
@@ -26,78 +27,27 @@ const giftRankingCategoryLabelToCodeMap = {
 } as const;
 
 export type UserGenderLabel = keyof typeof userLabelToCodeMap;
-export type UserGenderCode = (typeof userLabelToCodeMap)[UserGenderLabel];
-export type GiftRankingCategoryLabel =
-  keyof typeof giftRankingCategoryLabelToCodeMap;
-export type GiftRankingCategoryCode =
-  (typeof giftRankingCategoryLabelToCodeMap)[GiftRankingCategoryLabel];
+export type GiftRankingCategoryLabel = keyof typeof giftRankingCategoryLabelToCodeMap;
 
-const tabs: UserGenderLabel[] = Object.keys(
-  userLabelToCodeMap
-) as UserGenderLabel[];
-const subTabs: GiftRankingCategoryLabel[] = Object.keys(
-  giftRankingCategoryLabelToCodeMap
-) as GiftRankingCategoryLabel[];
+const tabs: UserGenderLabel[] = Object.keys(userLabelToCodeMap) as UserGenderLabel[];
+const subTabs: GiftRankingCategoryLabel[] = Object.keys(giftRankingCategoryLabelToCodeMap) as GiftRankingCategoryLabel[];
 
 const GiftRanking = () => {
   const theme = useCustomTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  const [products, setProducts] = useState<Product[]>([]);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-  const selectedTab = tabs.includes(
-    searchParams.get('gender') as UserGenderLabel
-  )
+  const selectedTab = tabs.includes(searchParams.get('gender') as UserGenderLabel)
     ? (searchParams.get('gender') as UserGenderLabel)
     : DEFAULT_GENDER;
 
-  const selectedSubTab = subTabs.includes(
-    searchParams.get('category') as GiftRankingCategoryLabel
-  )
+  const selectedSubTab = subTabs.includes(searchParams.get('category') as GiftRankingCategoryLabel)
     ? (searchParams.get('category') as GiftRankingCategoryLabel)
     : DEFAULT_CATEGORY;
 
-  const fetchData = async (
-    genderCode: UserGenderCode,
-    categoryCode: GiftRankingCategoryCode
-  ) => {
-    setLoading(true);
-    setError(false);
-    try {
-      const params = { targetType: genderCode, rankType: categoryCode };
-      const response = await apiClient.get('/api/products/ranking', { params });
-
-      const productList =
-        response.data?.data?.map((item: ProductApiResponse, index: number) => ({
-          id: item.id,
-          brand: item.brandInfo?.name || '',
-          name: item.name,
-          price: item.price?.sellingPrice || 0,
-          imageURL: item.imageURL,
-          ranking: index + 1,
-        })) ?? [];
-
-      setProducts(productList);
-    } catch (err) {
-      console.error('랭킹 호출 실패:', err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const genderCode = userLabelToCodeMap[selectedTab];
-    const categoryCode = giftRankingCategoryLabelToCodeMap[selectedSubTab];
-    console.log('[API 호출]', genderCode, categoryCode);
-
-    fetchData(genderCode, categoryCode);
-    setVisibleCount(INITIAL_VISIBLE_COUNT);
-  }, [selectedTab, selectedSubTab]);
+  const genderCode = userLabelToCodeMap[selectedTab];
+  const categoryCode = giftRankingCategoryLabelToCodeMap[selectedSubTab];
 
   const updateParams = (
     gender?: UserGenderLabel,
@@ -107,18 +57,14 @@ const GiftRanking = () => {
     if (gender) current.set('gender', gender);
     if (category) current.set('category', category);
     setSearchParams(current, { replace: true });
-  };
-
-  const handleMore = () => {
-    setVisibleCount((prev) => Math.min(prev + 3, products.length));
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
   };
 
   const handleProductClick = (product: Product) => {
     navigate(`/order/${product.id}`);
   };
 
-  if (loading) return <p>로딩중...</p>;
-  if (error) return <p>데이터를 불러오는데 실패했습니다.</p>;
+  const { data: products } = useSuspenseGiftRankingProducts(genderCode, categoryCode);
 
   return (
     <section
@@ -177,6 +123,7 @@ const GiftRanking = () => {
           </Button>
         ))}
       </div>
+
       {products.length === 0 ? (
         <p
           css={css`
@@ -224,7 +171,7 @@ const GiftRanking = () => {
                 justify-content: center;
               `}
             >
-              <Button onClick={handleMore} baseColor="white" textColor="black">
+              <Button onClick={() => setVisibleCount((prev) => prev + 3)} baseColor="white" textColor="black">
                 더보기
               </Button>
             </div>
@@ -234,4 +181,13 @@ const GiftRanking = () => {
     </section>
   );
 };
-export default GiftRanking;
+
+const GiftRankingWrapper = () => (
+  <ErrorBoundary fallback={<p>데이터를 불러오는데 실패했습니다.</p>}>
+    <Suspense fallback={<p>로딩 중입니다...</p>}>
+      <GiftRanking />
+    </Suspense>
+  </ErrorBoundary>
+);
+
+export default GiftRankingWrapper;

@@ -10,7 +10,7 @@ const useRequireAuth = () => {
 
   useEffect(() => {
     if (!user || !user.authToken) {
-      navigate(ROUTES.HOME, {
+      navigate(ROUTES.LOGIN, {
         replace: true,
         state: { from: location.pathname },
       });

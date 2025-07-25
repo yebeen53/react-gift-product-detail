@@ -1,9 +1,9 @@
 import { css } from '@emotion/react';
 import useCustomTheme from '../hooks/useCustomTheme';
 import type { Theme } from '@/data/theme';
-import { useEffect, useState } from 'react';
-import { fetchThemes, type ThemeItem } from '@/api/themes';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchThemes, type ThemeItem } from '@/api/themes';
 
 const wrapperStyle = (theme: Theme) => css`
   padding: ${theme.spacing.spacing2};
@@ -48,31 +48,20 @@ const itemStyle = (theme: Theme) => css`
 const GiftThemeSection = () => {
   const theme = useCustomTheme();
   const navigate = useNavigate();
-  const [themes, setThemes] = useState<ThemeItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchThemes()
-      .then((themeList) => {
-        setThemes(themeList);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
+  const { data: themes, isLoading, isError } = useQuery<ThemeItem[]>({
+    queryKey: ['themes'],
+    queryFn: fetchThemes,
+  });
 
-  if (loading) return <div css={wrapperStyle(theme)}>로딩 중...</div>;
-  if (error || themes.length === 0) return null;
+  if (isLoading) return <div css={wrapperStyle(theme)}>로딩 중...</div>;
+  if (isError || !themes || themes.length === 0) return null;
 
   return (
     <section css={wrapperStyle(theme)}>
       <h2 css={titleStyle(theme)}>선물 테마</h2>
       <div css={gridStyle(theme)}>
-        {themes.map((item: ThemeItem) => (
+        {themes.map((item) => (
           <div
             key={item.themeId}
             css={itemStyle(theme)}

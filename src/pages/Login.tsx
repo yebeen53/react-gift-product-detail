@@ -9,6 +9,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { isClientRequestError, isServerError } from '@/utils/http';
 import { ROUTES } from '@/constants/routes';
+import { useLoginMutation } from '@/hooks/useLoginMutation';
+
 
 interface LocationState {
   from?: {
@@ -62,41 +64,41 @@ const Login = () => {
     pwError,
   } = useLoginForm();
 
+  const loginMutation=useLoginMutation();
   const handleLogin = async () => {
-    if (isValidId && isValidPw) {
-      try {
-        const response = await axios.post('/api/login', {
-          email: id,
-          password: pw,
-        });
-        const token = response.data.data.authToken;
-        const { id: userId, name, email } = response.data.data;
-        const userInfo = { id: userId, name, email, authToken: token };
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('user', JSON.stringify(userInfo));
-        toast.success('로그인 성공!');
-        login(userInfo);
-        navigate(safeRedirectPath, { replace: true });
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          if (isClientRequestError(error)) {
-            toast.error(
-              error.response?.data?.message || '로그인에 실패했습니다.'
-            );
-          } else if (isServerError(error)) {
-            toast.error('서버 오류가 발생했습니다.');
-          } else {
-            toast.error('알 수 없는 오류가 발생했습니다.');
-          }
-        } else {
-          console.error('Unexpected error:', error);
-          toast.error('예상치 못한 오류가 발생했습니다.');
-        }
-      }
-    } else {
+    if (!isValidId || !isValidPw) {
       setTouchedId(true);
       setTouchedPw(true);
+      return;
     }
+      loginMutation.mutate({
+        email:id,password:pw
+      },      {
+        onSuccess: (data) => {
+          const { authToken, id: userId, name, email } = data;
+          const userInfo = { id: String(userId), name, email, authToken };
+          localStorage.setItem('authToken', authToken);
+          localStorage.setItem('user', JSON.stringify(userInfo));
+          toast.success('로그인 성공!');
+          login(userInfo);
+          navigate(safeRedirectPath, { replace: true });
+        },
+        onError: (error) => {
+          if (axios.isAxiosError(error)) {
+            if (isClientRequestError(error)) {
+              toast.error(error.response?.data?.message || '로그인에 실패했습니다.');
+            } else if (isServerError(error)) {
+              toast.error('서버 오류가 발생했습니다.');
+            } else {
+              toast.error('알 수 없는 오류가 발생했습니다.');
+            }
+          } else {
+            console.error('Unexpected error:', error);
+            toast.error('예상치 못한 오류가 발생했습니다.');
+          }
+        },
+      }
+    );
   };
 
   return (
