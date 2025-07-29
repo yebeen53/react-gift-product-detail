@@ -20,17 +20,13 @@ const containerStyle = (theme: Theme) => css`
 const ThemeProductContent = ({ themeId }: { themeId: string }) => {
   const navigate = useNavigate();
   const { data: bannerInfo } = useSuspenseThemeInfo(themeId);
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useSuspenseThemeProducts(themeId);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSuspenseThemeProducts(themeId);
 
   const products = data?.pages.flatMap((page) => page.list) ?? [];
 
   const handleProductClick = (productId: string | number) => {
-    navigate(`/order/${productId}`);
+    navigate(`/products/${productId}`);
   };
 
   return (
@@ -41,7 +37,7 @@ const ThemeProductContent = ({ themeId }: { themeId: string }) => {
             title: bannerInfo.title ?? bannerInfo.name,
             subtitle: bannerInfo.name,
             description: bannerInfo.description ?? '',
-            backgroundColor: bannerInfo.backgroundColor ?? '#333',
+            backgroundColor: bannerInfo.backgroundColor ?? theme.colors.semantic.textDefault,
             image: bannerInfo.image,
           }}
         />

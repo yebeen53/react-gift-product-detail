@@ -27,10 +27,15 @@ const giftRankingCategoryLabelToCodeMap = {
 } as const;
 
 export type UserGenderLabel = keyof typeof userLabelToCodeMap;
-export type GiftRankingCategoryLabel = keyof typeof giftRankingCategoryLabelToCodeMap;
+export type GiftRankingCategoryLabel =
+  keyof typeof giftRankingCategoryLabelToCodeMap;
 
-const tabs: UserGenderLabel[] = Object.keys(userLabelToCodeMap) as UserGenderLabel[];
-const subTabs: GiftRankingCategoryLabel[] = Object.keys(giftRankingCategoryLabelToCodeMap) as GiftRankingCategoryLabel[];
+const tabs: UserGenderLabel[] = Object.keys(
+  userLabelToCodeMap
+) as UserGenderLabel[];
+const subTabs: GiftRankingCategoryLabel[] = Object.keys(
+  giftRankingCategoryLabelToCodeMap
+) as GiftRankingCategoryLabel[];
 
 const GiftRanking = () => {
   const theme = useCustomTheme();
@@ -38,11 +43,15 @@ const GiftRanking = () => {
   const navigate = useNavigate();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
-  const selectedTab = tabs.includes(searchParams.get('gender') as UserGenderLabel)
+  const selectedTab = tabs.includes(
+    searchParams.get('gender') as UserGenderLabel
+  )
     ? (searchParams.get('gender') as UserGenderLabel)
     : DEFAULT_GENDER;
 
-  const selectedSubTab = subTabs.includes(searchParams.get('category') as GiftRankingCategoryLabel)
+  const selectedSubTab = subTabs.includes(
+    searchParams.get('category') as GiftRankingCategoryLabel
+  )
     ? (searchParams.get('category') as GiftRankingCategoryLabel)
     : DEFAULT_CATEGORY;
 
@@ -61,10 +70,13 @@ const GiftRanking = () => {
   };
 
   const handleProductClick = (product: Product) => {
-    navigate(`/order/${product.id}`);
+    navigate(`/products/${product.id}`);
   };
 
-  const { data: products } = useSuspenseGiftRankingProducts(genderCode, categoryCode);
+  const { data: products } = useSuspenseGiftRankingProducts(
+    genderCode,
+    categoryCode
+  );
 
   return (
     <section
@@ -171,7 +183,11 @@ const GiftRanking = () => {
                 justify-content: center;
               `}
             >
-              <Button onClick={() => setVisibleCount((prev) => prev + 3)} baseColor="white" textColor="black">
+              <Button
+                onClick={() => setVisibleCount((prev) => prev + 3)}
+                baseColor="white"
+                textColor="black"
+              >
                 더보기
               </Button>
             </div>
