@@ -3,6 +3,7 @@ import React from 'react';
 interface ErrorBoundaryProps {
   fallback: React.ReactNode;
   children: React.ReactNode;
+  onError?: (error: Error) => void;
 }
 
 interface ErrorBoundaryState {

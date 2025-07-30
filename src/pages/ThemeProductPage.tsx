@@ -1,15 +1,17 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
-import { Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import { Suspense, useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import { useSuspenseThemeInfo } from '@/hooks/useSuspenseThemeInfo';
 import { useSuspenseThemeProducts } from '@/hooks/useSuspenseThemeProduct';
+
 
 import HeroBanner from '@/components/HeroBanner';
 import ProductList from '@/components/ProductList';
 import type { Theme } from '@/data/theme';
 import theme from '@/data/theme';
 import { ROUTES } from '@/constants/routes';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const containerStyle = (theme: Theme) => css`
   max-width: 960px;
@@ -58,19 +60,20 @@ const ThemeProductContent = ({ themeId }: { themeId: string }) => {
 const ThemeProductPage = () => {
   const { themeId } = useParams<{ themeId: string }>();
   const navigate = useNavigate();
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const axiosError = error as AxiosError;
+  
+    if (axiosError?.response?.status === 404) {
+      navigate(ROUTES.HOME);
+    }
+  }, [error, navigate]);
 
   if (!themeId) return <p>테마 ID가 없습니다.</p>;
 
   return (
-    <ErrorBoundary
-      fallbackRender={({ error }) => {
-        if (error?.response?.status === 404) {
-          navigate(ROUTES.HOME);
-          return null;
-        }
-        return <p>문제가 발생했습니다. 다시 시도해주세요.</p>;
-      }}
-    >
+    <ErrorBoundary  fallback={<p>문제가 발생했습니다. 다시 시도해주세요.</p>} onError={setError}>
       <Suspense fallback={<p>로딩 중...</p>}>
         <ThemeProductContent themeId={themeId} />
       </Suspense>

@@ -1,13 +1,14 @@
 import { useState, Suspense } from 'react';
 import { css } from '@emotion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ErrorBoundary } from 'react-error-boundary';
+
 
 import useCustomTheme from '../hooks/useCustomTheme';
 import Button from '@/components/Button';
 import GiftItem from '@/components/GiftItem';
 import { useSuspenseGiftRankingProducts } from '@/hooks/useSuspenseGiftRankingProducts';
 import type { Product } from '@/types/product';
+import { ErrorBoundary } from './ErrorBoundary';
 
 const DEFAULT_GENDER = '전체';
 const DEFAULT_CATEGORY = '받고 싶어한';
