@@ -18,12 +18,13 @@ const ProductAnnouncements = ({ productId }: Props) => {
       }}
     >
       <h2>상세정보</h2>
-
-      {detail.announcements.map((a) => (
-        <li key={a.displayOrder}>
-          <strong>{a.name}</strong>: {a.value}
-        </li>
-      ))}
+      <ul style={{ backgroundColor: theme.colors.semantic.backgroundDefault }}>
+        {detail.announcements.map((announcement) => (
+          <li key={announcement.displayOrder}>
+            <strong>{announcement.name}</strong>: {announcement.value}
+          </li>
+        ))}
+      </ul>
     </section>
   );
 };
