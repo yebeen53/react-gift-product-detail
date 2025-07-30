@@ -9,7 +9,6 @@ import ProductDetailSummary from '@/components/productdetail/ProductDetailSummar
 
 import FixedOrderBar from '@/components/productdetail/FixedOrderBar';
 import theme from '@/data/theme';
-const Loading = () => <div>로딩 중...</div>;
 
 const TAB_LIST = [
   { key: 'detail', label: '상품 설명' },
@@ -55,7 +54,7 @@ const ProductDetailPage = () => {
     <ErrorBoundary
       fallback={<div>상품 정보를 불러오는 중 오류가 발생했습니다.</div>}
     >
-      <Suspense fallback={<Loading />}>
+
         <ProductDetailSummary productId={productId} />
 
         <div
@@ -92,7 +91,6 @@ const ProductDetailPage = () => {
           {renderTabContent()}
         </div>
         <FixedOrderBar productId={productId} />
-      </Suspense>
     </ErrorBoundary>
   );
 };
