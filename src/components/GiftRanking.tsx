@@ -2,7 +2,6 @@ import { useState, Suspense } from 'react';
 import { css } from '@emotion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-
 import useCustomTheme from '../hooks/useCustomTheme';
 import Button from '@/components/Button';
 import GiftItem from '@/components/GiftItem';
@@ -10,34 +9,17 @@ import { useSuspenseGiftRankingProducts } from '@/hooks/useSuspenseGiftRankingPr
 import type { Product } from '@/types/product';
 import { ErrorBoundary } from './ErrorBoundary';
 
-const DEFAULT_GENDER = '전체';
-const DEFAULT_CATEGORY = '받고 싶어한';
-const INITIAL_VISIBLE_COUNT = 6;
-
-const userLabelToCodeMap = {
-  전체: 'ALL',
-  여성이: 'FEMALE',
-  남성이: 'MALE',
-  청소년이: 'TEEN',
-} as const;
-
-const giftRankingCategoryLabelToCodeMap = {
-  '받고 싶어한': 'MANY_WISH',
-  '많이 선물한': 'MANY_RECEIVE',
-  '위시로 받은': 'MANY_WISH_RECEIVE',
-} as const;
-
-export type UserGenderLabel = keyof typeof userLabelToCodeMap;
-export type GiftRankingCategoryLabel =
-  keyof typeof giftRankingCategoryLabelToCodeMap;
-
-const tabs: UserGenderLabel[] = Object.keys(
-  userLabelToCodeMap
-) as UserGenderLabel[];
-const subTabs: GiftRankingCategoryLabel[] = Object.keys(
-  giftRankingCategoryLabelToCodeMap
-) as GiftRankingCategoryLabel[];
-
+import {
+  DEFAULT_GENDER,
+  DEFAULT_CATEGORY,
+  INITIAL_VISIBLE_COUNT,
+  userLabelToCodeMap,
+  giftRankingCategoryLabelToCodeMap,
+  tabs,
+  subTabs,
+  type UserGenderLabel,
+  type GiftRankingCategoryLabel,
+} from './giftRanking.constants';
 const GiftRanking = () => {
   const theme = useCustomTheme();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -200,11 +182,12 @@ const GiftRanking = () => {
 };
 
 const GiftRankingWrapper = () => (
-  <ErrorBoundary fallback={<p>데이터를 불러오는데 실패했습니다.</p>}>
-    <Suspense fallback={<p>로딩 중입니다...</p>}>
+  <ErrorBoundary
+    fallback={<p data-testid="error">데이터를 불러오는데 실패했습니다.</p>}
+  >
+    <Suspense fallback={<p data-testid="loading">로딩 중입니다...</p>}>
       <GiftRanking />
     </Suspense>
   </ErrorBoundary>
 );
-
 export default GiftRankingWrapper;
