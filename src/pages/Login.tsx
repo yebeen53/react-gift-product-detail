@@ -10,8 +10,6 @@ import { toast } from 'react-toastify';
 import { isClientRequestError, isServerError } from '@/utils/http';
 import { ROUTES } from '@/constants/routes';
 import { useLoginMutation } from '@/hooks/useLoginMutation';
-
-
 interface LocationState {
   from?: {
     pathName: string;
@@ -65,6 +63,8 @@ const Login = () => {
   } = useLoginForm();
 
   const loginMutation=useLoginMutation();
+  const { isPending } = useLoginMutation();
+  
   const handleLogin = async () => {
     if (!isValidId || !isValidPw) {
       setTouchedId(true);
@@ -140,7 +140,7 @@ const Login = () => {
             : theme.colors.semantic.kakaoYellowHover
         }
         textColor="black"
-        disabled={!isValidId || !isValidPw}
+        disabled={!isValidId || !isValidPw || isPending}
       >
         로그인
       </Button>
