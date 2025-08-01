@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ProductDetailSummary 컴포넌트 컴포넌트의 스타일 및 구조가 스냅샷과 일치해야 한다 1`] = `
+<DocumentFragment>
+  <section>
+    <img
+      alt="최신 스마트워치"
+      src="product-main.jpg"
+    />
+    <h1
+      style="margin: 16px;"
+    >
+      최신 스마트워치
+    </h1>
+    <h1
+      style="margin: 16px;"
+    >
+      250000원
+    </h1>
+    <div
+      style="display: flex; align-items: center; gap: 8px; margin: 16px;"
+    >
+      <img
+        alt="ABC 전자"
+        src="brand-logo.png"
+        style="height: 32px; width: auto; object-fit: contain;"
+      />
+      <h1
+        style="font-size: 32px; margin: 0px;"
+      >
+        ABC 전자
+      </h1>
+    </div>
+  </section>
+</DocumentFragment>
+`;

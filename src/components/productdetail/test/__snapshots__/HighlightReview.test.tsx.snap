@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`HighlightReview 컴포넌트 컴포넌트의 스타일 및 구조가 스냅샷과 일치해야 한다 1`] = `
+<DocumentFragment>
+  <section
+    style="margin: 16px;"
+  >
+    <h2>
+      선물후기
+    </h2>
+    <div>
+      <p>
+        정말 만족스러운 상품입니다!
+      </p>
+      <p>
+        김구매자
+      </p>
+    </div>
+    <div>
+      <p>
+        배송이 빠르고 품질도 좋아요.
+      </p>
+      <p>
+        이소비자
+      </p>
+    </div>
+  </section>
+</DocumentFragment>
+`;

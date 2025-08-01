@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`FixedOrderBar 컴포넌트 컴포넌트의 스타일 및 구조가 스냅샷과 일치해야 한다 1`] = `
+<DocumentFragment>
+  <div
+    style="height: 64px;"
+  />
+  <div
+    style="position: fixed; bottom: 0px; left: 0px; right: 0px; background-color: rgb(255, 255, 255); border-top: 1px solid rgb(221, 221, 221); display: flex; justify-content: center; padding: 16px; z-index: 1000;"
+  >
+    <div
+      style="display: flex; align-items: center; gap: 16px; width: 100%; max-width: 720px;"
+    >
+      <button
+        data-testid="mock-wish-button"
+      >
+        찜하기 test-product-id
+      </button>
+      <button
+        style="background-color: rgb(254, 229, 0); color: rgb(42, 48, 56); flex: 1 1 0%; height: 40px; border-radius: 4px; cursor: pointer;"
+      >
+        주문하기
+      </button>
+    </div>
+  </div>
+</DocumentFragment>
+`;

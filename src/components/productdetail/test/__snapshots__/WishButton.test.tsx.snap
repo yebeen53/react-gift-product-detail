@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`WishButton 컴포넌트 찜한 상태일 때 컴포넌트의 스타일이 스냅샷과 일치해야 한다 1`] = `
+<DocumentFragment>
+  <button
+    aria-pressed="true"
+    css="[object Object]"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-heart"
+      fill="red"
+      height="25"
+      stroke="red"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="25"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+      />
+    </svg>
+    <span>
+      1
+    </span>
+  </button>
+</DocumentFragment>
+`;
+
+exports[`WishButton 컴포넌트 컴포넌트의 스타일이 스냅샷과 일치해야 한다 1`] = `
+<DocumentFragment>
+  <button
+    aria-pressed="false"
+    css="[object Object]"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-heart"
+      fill="none"
+      height="25"
+      stroke="red"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="25"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+      />
+    </svg>
+    <span>
+      0
+    </span>
+  </button>
+</DocumentFragment>
+`;

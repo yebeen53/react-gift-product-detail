@@ -8,6 +8,9 @@ interface Props {
 
 const ProductDetailInfoInner = ({ productId }: Props) => {
   const { data: detail } = useProductDetail(productId);
+  if (!detail) {
+    return <div>로딩중...</div>; 
+  }
 
   return (
     <section style={{ margin: theme.spacing.spacing4 }}>

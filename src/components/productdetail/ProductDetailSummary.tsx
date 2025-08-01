@@ -8,9 +8,11 @@ interface Props {
 const ProductDetailSummary = ({ productId }: Props) => {
   const { data: product } = useProduct(productId);
 
+  if(!product) return null;
+
   return (
     <section>
-      <img src={product.imageURL} />
+      <img src={product.imageURL} alt={product.name} />
       <h1 style={{ margin: theme.spacing.spacing4,}}>{product.name}</h1>
       <h1 style={{ margin: theme.spacing.spacing4, }}>{product.price.sellingPrice}원</h1>
       <div
