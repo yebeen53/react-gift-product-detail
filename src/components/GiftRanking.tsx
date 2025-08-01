@@ -20,6 +20,7 @@ import {
   type UserGenderLabel,
   type GiftRankingCategoryLabel,
 } from './giftRanking.constants';
+
 const GiftRanking = () => {
   const theme = useCustomTheme();
   const [searchParams, setSearchParams] = useSearchParams();
