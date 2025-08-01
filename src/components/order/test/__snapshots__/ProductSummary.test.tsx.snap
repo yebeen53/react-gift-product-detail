@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ProductSummary 컴포넌트 컴포넌트의 스타일이 스냅샷과 일치해야 한다 1`] = `
+<DocumentFragment>
+  <div
+    style="display: flex; align-items: center; gap: 16px; margin-top: 20px; border: 1px solid rgb(220, 222, 227);"
+  >
+    <img
+      alt="멋진 선물세트"
+      src="https://example.com/product-image.jpg"
+      style="width: 64px; height: 64px; object-fit: cover; border-radius: #dcdee3;"
+    />
+    <div>
+      <h3
+        style="font-size: 1rem; font-weight: 700; margin-bottom: 4px;"
+      >
+        멋진 선물세트
+      </h3>
+      <p
+        style="color: rgb(42, 48, 56); font-size: 0.875rem;"
+      >
+        최고의 브랜드
+      </p>
+      <p
+        style="font-weight: 400; margin-top: 4px;"
+      >
+        상품가 35,000원
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;

@@ -6,7 +6,7 @@ type ProductSummaryProps = {
     name: string;
     brandName?: string;
     price: number;
-  };
+  }| null;
   theme: Theme;
 };
 

@@ -53,7 +53,7 @@ const CardSelector = ({ selectedCardId, setValue, theme }: Props) => {
           <CardThumbnail
             key={card.id}
             src={card.thumbUrl}
-            alt="card"
+            alt={`card-${card.id}`}
             onClick={() => handleSelectCard(card.id)}
             selected={selectedCardId === `card${card.id}`}
             theme={theme}
@@ -61,7 +61,11 @@ const CardSelector = ({ selectedCardId, setValue, theme }: Props) => {
         ))}
       </ScrollContainer>
       {selectedCard && (
-        <SelectedImage src={selectedCard.imageUrl} theme={theme} />
+        <SelectedImage
+          src={selectedCard.imageUrl}
+          alt={`선택된 카드 이미지: ${selectedCard.id}`}
+          theme={theme}
+        />
       )}
     </section>
   );
