@@ -2,9 +2,9 @@ name: Run Lint, Build, and Tests on PR and Main Branch
 
 on:
   pull_request:
-    branches: [main, step3]
+    branches: [main, step3,yebeen53]
   push:
-    branches: [main, step3]
+    branches: [main, step3,yebeen53]
 
 jobs:
   test:
